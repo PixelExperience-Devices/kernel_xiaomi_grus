@@ -300,7 +300,7 @@
 			goodix,panel-max-p = <127>;
 			goodix,panel-max-fod = <127>;
 	/*		goodix,panel-key-map = <158 172 217>; */ /*KEY_BACK, KEY_HOMEPAGE, KEY_SEARCH*/
-			goodix,power-on-delay-us = <300000>; /*300ms*/
+			goodix,power-on-delay-us = <20000>; /*20ms*/
 			goodix,power-off-delay-us = <5000>;
 			goodix,cfg-name = "goodix_gt9886_cfg_f2.bin";
 	/*		goodix,swap-axis; */
@@ -309,7 +309,7 @@
 	/*		goodix,pen-enable; */
 	/*		goodix,key-of-pen = <331 332>; */ /*BTN_STYLUS, BTN_STYLUS2*/
 			sensor1 {
-					normal-cfg = [ 
+					normal-cfg = [
 					];
 					goodix,fw-name = "goodix_gt9886_fw_f2.bin";
 					goodix,limit-name = "goodix_gt9886_limit_f2.tporder";
@@ -830,5 +830,3 @@
 	no-map;
 	reg = <0 0x97615000 0 0x2000>;
 };
-
-
