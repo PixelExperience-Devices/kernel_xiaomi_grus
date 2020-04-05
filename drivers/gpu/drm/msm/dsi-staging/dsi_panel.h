@@ -53,6 +53,11 @@ enum dsi_backlight_type {
 	DSI_BACKLIGHT_MAX,
 };
 
+enum dsi_doze_mode_type {
+	DSI_DOZE_LPM = 0,
+	DSI_DOZE_HBM,
+};
+
 enum bl_update_flag {
 	BL_UPDATE_DELAY_UNTIL_FIRST_FRAME,
 	BL_UPDATE_NONE,
@@ -231,6 +236,9 @@ struct dsi_panel {
 	s32 backlight_delta;
 	u32 doze_backlight_threshold;
 
+	bool doze_enabled;
+	enum dsi_doze_mode_type doze_mode;
+
 	u32 hist_bl_offset;
 	u32 panel_on_dimming_delay;
 	struct delayed_work cmds_work;
@@ -345,5 +353,9 @@ int dsi_panel_parse_esd_reg_read_configs(struct dsi_panel *panel,
 				struct device_node *of_node);
 
 void dsi_panel_ext_bridge_put(struct dsi_panel *panel);
+
+int dsi_panel_set_doze_status(struct dsi_panel *panel, bool status);
+
+int dsi_panel_set_doze_mode(struct dsi_panel *panel, enum dsi_doze_mode_type mode);
 
 #endif /* _DSI_PANEL_H_ */
