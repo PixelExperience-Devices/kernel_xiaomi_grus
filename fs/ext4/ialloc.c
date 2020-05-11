@@ -745,9 +745,9 @@ struct inode *__ext4_new_inode(handle_t *handle, struct inode *dir,
 	if (!dir || !dir->i_nlink)
 		return ERR_PTR(-EPERM);
 
-	if ((ext4_encrypted_inode(dir) ||
+	if ((IS_ENCRYPTED(dir) ||
 	     DUMMY_ENCRYPTION_ENABLED(EXT4_SB(dir->i_sb))) &&
-	    (S_ISREG(mode) || S_ISDIR(mode) || S_ISLNK(mode))) {
+	     (S_ISREG(mode) || S_ISDIR(mode) || S_ISLNK(mode))) {
 		err = fscrypt_get_encryption_info(dir);
 		if (err)
 			return ERR_PTR(err);
@@ -1162,7 +1162,7 @@ struct inode *ext4_orphan_get(struct super_block *sb, unsigned long ino)
 	if (!ext4_test_bit(bit, bitmap_bh->b_data))
 		goto bad_orphan;
 
-	inode = ext4_iget(sb, ino, EXT4_IGET_NORMAL);
+	inode = ext4_iget(sb, ino);
 	if (IS_ERR(inode)) {
 		err = PTR_ERR(inode);
 		ext4_error(sb, "couldn't read orphan inode %lu (err %d)",

@@ -735,10 +735,10 @@ TRACE_EVENT(sched_energy_diff,
 TRACE_EVENT(sched_task_util,
 
 	TP_PROTO(struct task_struct *p, int next_cpu, int backup_cpu,
-		 int target_cpu, bool need_idle, int fastpath,
+		 int target_cpu, bool sync, bool need_idle, int fastpath,
 		 bool placement_boost, int rtg_cpu, u64 start_t),
 
-	TP_ARGS(p, next_cpu, backup_cpu, target_cpu, need_idle, fastpath,
+	TP_ARGS(p, next_cpu, backup_cpu, target_cpu, sync, need_idle, fastpath,
 		placement_boost, rtg_cpu, start_t),
 
 	TP_STRUCT__entry(
@@ -749,6 +749,7 @@ TRACE_EVENT(sched_task_util,
 		__field(int, next_cpu			)
 		__field(int, backup_cpu			)
 		__field(int, target_cpu			)
+		__field(bool, sync			)
 		__field(bool, need_idle			)
 		__field(int, fastpath			)
 		__field(bool, placement_boost		)
@@ -764,6 +765,7 @@ TRACE_EVENT(sched_task_util,
 		__entry->next_cpu		= next_cpu;
 		__entry->backup_cpu		= backup_cpu;
 		__entry->target_cpu		= target_cpu;
+		__entry->sync			= sync;
 		__entry->need_idle		= need_idle;
 		__entry->fastpath		= fastpath;
 		__entry->placement_boost	= placement_boost;
@@ -771,8 +773,8 @@ TRACE_EVENT(sched_task_util,
 		__entry->latency		= (sched_clock() - start_t);
 	),
 
-	TP_printk("pid=%d comm=%s util=%lu prev_cpu=%d next_cpu=%d backup_cpu=%d target_cpu=%d need_idle=%d fastpath=%d placement_boost=%d rtg_cpu=%d latency=%llu",
-		__entry->pid, __entry->comm, __entry->util, __entry->prev_cpu, __entry->next_cpu, __entry->backup_cpu, __entry->target_cpu, __entry->need_idle,  __entry->fastpath, __entry->placement_boost, __entry->rtg_cpu, __entry->latency)
+	TP_printk("pid=%d comm=%s util=%lu prev_cpu=%d next_cpu=%d backup_cpu=%d target_cpu=%d sync=%d need_idle=%d fastpath=%d placement_boost=%d rtg_cpu=%d latency=%llu",
+		__entry->pid, __entry->comm, __entry->util, __entry->prev_cpu, __entry->next_cpu, __entry->backup_cpu, __entry->target_cpu, __entry->sync, __entry->need_idle,  __entry->fastpath, __entry->placement_boost, __entry->rtg_cpu, __entry->latency)
 );
 
 #endif
@@ -1786,6 +1788,11 @@ TRACE_EVENT(sched_get_nr_running_avg,
 	TP_ARGS(avg, big_avg, iowait_avg, max_nr, big_max_nr),
 
 	TP_STRUCT__entry(
+		__field( int,	avg			)
+		__field( int,	big_avg			)
+		__field( int,	iowait_avg		)
+		__field( unsigned int,	max_nr		)
+		__field( unsigned int,	big_max_nr	)
 		__array(	char,	comm,   TASK_COMM_LEN	)
 		__field(	pid_t,	pid			)
 		__field(	pid_t,	cur_pid			)
@@ -1817,9 +1824,12 @@ TRACE_EVENT(sched_get_nr_running_avg,
 		__entry->big_max_nr	= big_max_nr;
 	),
 
-	TP_printk("wc %llu ws %llu delta %llu event %d cpu %d cur_pid %d task %d (%s) ms %llu delta %llu demand %u sum %u irqtime %llu"
-		" cs %llu ps %llu util %llu cur_window %u prev_window %u active_wins %u"
-		, __entry->wallclock, __entry->win_start, __entry->delta,
+	TP_printk("avg=%d big_avg=%d iowait_avg=%d max_nr=%u big_max_nr=%u"
+		" wc %llu ws %llu delta %llu event %d cpu %d cur_pid %d task %d (%s) ms %llu delta %llu demand %u sum %u irqtime %llu"
+		" cs %llu ps %llu util %llu cur_window %u prev_window %u active_wins %u",
+		__entry->avg, __entry->big_avg, __entry->iowait_avg,
+		__entry->max_nr, __entry->big_max_nr,
+		__entry->wallclock, __entry->win_start, __entry->delta,
 		__entry->evt, __entry->cpu, __entry->cur_pid,
 		__entry->pid, __entry->comm, __entry->mark_start,
 		__entry->delta_m, __entry->demand,
