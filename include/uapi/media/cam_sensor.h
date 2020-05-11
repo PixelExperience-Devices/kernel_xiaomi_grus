@@ -10,6 +10,7 @@
 #define MAX_OIS_NAME_SIZE 32
 #define MAX_ACTUATOR_NAME_SIZE 32
 #define CAM_CSIPHY_SECURE_MODE_ENABLED 1
+#define CAM_IR_LED_SUPPORTED
 /**
  * struct cam_sensor_query_cap - capabilities info for sensor
  *
@@ -23,6 +24,7 @@
  * @ois_slot_id      :  OIS slot id which connected to sensor
  * @flash_slot_id    :  Flash slot id which connected to sensor
  * @csiphy_slot_id   :  CSIphy slot id which connected to sensor
+ * @irled_slot_id    :  IRLED slot id which connected to sensor
  *
  */
 struct  cam_sensor_query_cap {
@@ -36,6 +38,7 @@ struct  cam_sensor_query_cap {
 	uint32_t        ois_slot_id;
 	uint32_t        flash_slot_id;
 	uint32_t        csiphy_slot_id;
+	uint32_t        ir_led_slot_id;
 } __attribute__((packed));
 
 /**
@@ -498,5 +501,30 @@ struct cam_flash_query_cap_info {
 	uint32_t    max_duration_flash[CAM_FLASH_MAX_LED_TRIGGERS];
 	uint32_t    max_current_torch[CAM_FLASH_MAX_LED_TRIGGERS];
 } __attribute__ ((packed));
+
+/**
+ * struct cam_ir_led_query_cap  :  capabilities info for ir_led
+ *
+ * @slot_info           :  Indicates about the slotId or cell Index
+ *
+ */
+struct cam_ir_led_query_cap_info {
+	uint32_t    slot_info;
+} __attribute__ ((packed));
+
+/**
+ * struct cam_ir_ledset_on_off : led turn on/off command buffer
+ *
+ * @opcode             :   command buffer opcodes
+ * @cmd_type           :   command buffer operation type
+ * @ir_led_intensity   :   ir led intensity level
+ *
+ */
+struct cam_ir_led_set_on_off {
+	uint16_t    reserved;
+	uint8_t     opcode;
+	uint8_t     cmd_type;
+	uint32_t    ir_led_intensity;
+} __attribute__((packed));
 
 #endif
