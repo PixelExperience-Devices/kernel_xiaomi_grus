@@ -841,6 +841,20 @@ int dsi_panel_set_backlight(struct dsi_panel *panel, u32 bl_lvl)
 	return rc;
 }
 
+static u32 dsi_panel_get_backlight(struct dsi_panel *panel)
+{
+	u32 bl_level;
+
+	if (panel->doze_enabled && panel->doze_mode == DSI_DOZE_HBM)
+		bl_level = panel->bl_config.bl_doze_hbm;
+	else if (panel->doze_enabled && panel->doze_mode == DSI_DOZE_LPM)
+		bl_level = panel->bl_config.bl_doze_lpm;
+	else if (!panel->doze_enabled)
+		bl_level = panel->bl_config.bl_level;
+
+	return bl_level;
+}
+
 int dsi_panel_update_doze(struct dsi_panel *panel) {
 	int rc = 0;
 
@@ -2364,6 +2378,22 @@ static int dsi_panel_parse_bl_config(struct dsi_panel *panel,
 		panel->bl_config.brightness_max_level = val;
 	}
 
+	rc = of_property_read_u32(of_node, "qcom,disp-doze-lpm-backlight", &val);
+	if (rc) {
+		panel->bl_config.bl_doze_lpm = 0;
+		pr_debug("set doze lpm backlight to 0\n");
+	} else {
+		panel->bl_config.bl_doze_lpm = val;
+	}
+
+	rc = of_property_read_u32(of_node, "qcom,disp-doze-hbm-backlight", &val);
+	if (rc) {
+		panel->bl_config.bl_doze_hbm = 0;
+		pr_debug("set doze hbm backlight to 0\n");
+	} else {
+		panel->bl_config.bl_doze_hbm = val;
+	}
+
 	if (panel->bl_config.type == DSI_BACKLIGHT_PWM) {
 		rc = dsi_panel_parse_bl_pwm_config(&panel->bl_config, of_node);
 		if (rc) {
@@ -3582,25 +3612,25 @@ static ssize_t mdss_fb_set_ea_elvss_off_treshold(struct device *dev,
 static ssize_t mdss_fb_get_ea_elvss_off_treshold(struct device *dev,
                 struct device_attribute *attr, char *buf)
 {
-        int ret; 
+        int ret;
         u32 ea_elvss_off_treshold = get_ea_elvss_off_treshold();
 
         ret = scnprintf(buf, PAGE_SIZE, "%d\n", ea_elvss_off_treshold);
 
-        return ret; 
+        return ret;
 }
 
 static ssize_t mdss_fb_set_ea_min(struct device *dev,
-                struct device_attribute *attr, const char *buf, size_t len) 
+                struct device_attribute *attr, const char *buf, size_t len)
 {
         u32 ea_min;
 
         if (sscanf(buf, "%d", &ea_min) < 1) {
-                return len; 
-        }    
+                return len;
+        }
 
         set_ea_fb_min(ea_min);
-        return len; 
+        return len;
 }
 
 static ssize_t mdss_fb_get_ea_min(struct device *dev,
@@ -3939,7 +3969,7 @@ int dsi_panel_drv_init(struct dsi_panel *panel,
 		pr_err("sysfs group creation failed, rc=%d\n", rc);
 	set_panel = panel;
 #endif
-	
+
 #if DSI_READ_WRITE_PANEL_DEBUG
 	mipi_proc_entry = proc_create(MIPI_PROC_NAME, 0664, NULL, &mipi_reg_proc_fops);
 	if (!mipi_proc_entry)
