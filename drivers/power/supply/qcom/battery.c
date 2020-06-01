@@ -1,4 +1,5 @@
 /* Copyright (c) 2018 The Linux Foundation. All rights reserved.
+ * Copyright (C) 2020 XiaoMi, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -45,10 +46,10 @@
 #define USBIN_I_VOTER			"USBIN_I_VOTER"
 #define PL_FCC_LOW_VOTER		"PL_FCC_LOW_VOTER"
 #define ICL_LIMIT_VOTER			"ICL_LIMIT_VOTER"
+#define FCC_STEPPER_VOTER		"FCC_STEPPER_VOTER"
 #define PL_HIGH_CAPACITY_VOTER          "PL_HIGH_CAPACITY_VOTER"
 
 #define CONFIG_SLAVE_PCT	65
-#define FCC_STEPPER_VOTER		"FCC_STEPPER_VOTER"
 
 struct pl_data {
 	int			pl_mode;
@@ -84,7 +85,6 @@ struct pl_data {
 	int			total_settled_ua;
 	int			pl_settled_ua;
 	int			pl_fcc_max;
-	bool		pl_disable;
 	int			fcc_stepper_enable;
 	int			main_step_fcc_dir;
 	int			main_step_fcc_count;
@@ -97,7 +97,9 @@ struct pl_data {
 	struct class		qcom_batt_class;
 	struct wakeup_source	*pl_ws;
 	struct notifier_block	nb;
+	bool			pl_disable;
 	int			taper_entry_fv;
+	u32			float_voltage_uv;
 };
 
 struct pl_data *the_chip;
@@ -128,10 +130,10 @@ enum {
 	SLAVE_PCT,
 	RESTRICT_CHG_ENABLE,
 	RESTRICT_CHG_CURRENT,
+	FCC_STEPPING_IN_PROGRESS,
 #ifdef CONFIG_CHARGER_BQ25910_SLAVE
 	CONST_SLAVE_PCT,
 #endif
-	FCC_STEPPING_IN_PROGRESS,
 };
 
 /*******
@@ -445,12 +447,12 @@ static struct class_attribute pl_attributes[] = {
 					restrict_chg_show, restrict_chg_store),
 	[RESTRICT_CHG_CURRENT]	= __ATTR(restricted_current, 0644,
 					restrict_cur_show, restrict_cur_store),
+	[FCC_STEPPING_IN_PROGRESS]
+				= __ATTR_RO(fcc_stepping_in_progress),
 #ifdef CONFIG_CHARGER_BQ25910_SLAVE
 	[CONST_SLAVE_PCT]       = __ATTR(const_parallel_pct, 0644,
 					const_slave_pct_show, const_slave_pct_store),
 #endif
-	[FCC_STEPPING_IN_PROGRESS]
-				= __ATTR_RO(fcc_stepping_in_progress),
 	__ATTR_NULL,
 };
 
@@ -863,6 +865,17 @@ out:
 	vote(chip->pl_awake_votable, FCC_STEPPER_VOTER, false, 0);
 }
 
+static bool is_batt_available(struct pl_data *chip)
+{
+	if (!chip->batt_psy)
+		chip->batt_psy = power_supply_get_by_name("battery");
+
+	if (!chip->batt_psy)
+		return false;
+
+	return true;
+}
+
 #define PARALLEL_FLOAT_VOLTAGE_DELTA_UV 50000
 static int pl_fv_vote_callback(struct votable *votable, void *data,
 			int fv_uv, const char *client)
@@ -895,6 +908,31 @@ static int pl_fv_vote_callback(struct votable *votable, void *data,
 			return rc;
 		}
 	}
+
+	/*
+	 * check for termination at reduced float voltage and re-trigger
+	 * charging if new float voltage is above last FV.
+	 */
+	if ((chip->float_voltage_uv < fv_uv) && is_batt_available(chip)) {
+		rc = power_supply_get_property(chip->batt_psy,
+				POWER_SUPPLY_PROP_STATUS, &pval);
+		if (rc < 0) {
+			pr_err("Couldn't get battery status rc=%d\n", rc);
+		} else {
+			if (pval.intval == POWER_SUPPLY_STATUS_FULL) {
+				pr_debug("re-triggering charging\n");
+				pval.intval = 1;
+				rc = power_supply_set_property(chip->batt_psy,
+					POWER_SUPPLY_PROP_RECHARGE_SOC,
+					&pval);
+				if (rc < 0)
+					pr_err("Couldn't set force recharge rc=%d\n",
+							rc);
+			}
+		}
+	}
+
+	chip->float_voltage_uv = fv_uv;
 
 	return 0;
 }
@@ -1001,17 +1039,6 @@ static bool is_main_available(struct pl_data *chip)
 	return !!chip->main_psy;
 }
 
-static bool is_batt_available(struct pl_data *chip)
-{
-	if (!chip->batt_psy)
-		chip->batt_psy = power_supply_get_by_name("battery");
-
-	if (!chip->batt_psy)
-		return false;
-
-	return true;
-}
-
 static int pl_disable_vote_callback(struct votable *votable,
 		void *data, int pl_disable, const char *client)
 {
@@ -1064,7 +1091,6 @@ static int pl_disable_vote_callback(struct votable *votable,
 					chip->pl_min_icl_ua);
 			return 0;
 		}
-
 		 /* enable parallel charging */
 		rc = power_supply_get_property(chip->pl_psy,
 				POWER_SUPPLY_PROP_CHARGE_TYPE, &pval);
@@ -1347,6 +1373,13 @@ static void handle_main_charge_type(struct pl_data *chip)
 	int taper_soc = 0;
 	int taper_vbatt = 0;
 
+	/*
+	 * If charge type failed to change to taper, pl_taper_work cannot
+	 * be launched anymore, so parallel charging cannot be disabled,
+	 * if battery capacity is high, do not allow parallel charging
+	 * to protect the battery avoiding battery over voltage if
+	 * pm670 charge type may failed to change from fast to taper.
+	 */
 	rc = power_supply_get_property(chip->batt_psy,
 			POWER_SUPPLY_PROP_CAPACITY, &pval);
 	if (rc < 0) {
@@ -1732,6 +1765,7 @@ int qcom_batt_init(int smb_version)
 		goto unreg_notifier;
 	}
 
+	chip->pl_disable = true;
 	chip->qcom_batt_class.name = "qcom-battery",
 	chip->qcom_batt_class.owner = THIS_MODULE,
 	chip->qcom_batt_class.class_attrs = pl_attributes;

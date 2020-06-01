@@ -1,4 +1,5 @@
-/* Copyright (c) 2016-2018 The Linux Foundation. All rights reserved.
+/* Copyright (c) 2016-2019 The Linux Foundation. All rights reserved.
+ * Copyright (C) 2020 XiaoMi, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -572,7 +573,7 @@ enum {
 
 #define TYPE_C_CFG_2_REG			(USBIN_BASE + 0x59)
 #define TYPE_C_DFP_CURRSRC_MODE_BIT		BIT(7)
-#define VCONN_ILIM500MA_CFG_BIT			BIT(6)
+#define DFP_CC_1P4V_OR_1P6V_BIT			BIT(6)
 #define VCONN_SOFTSTART_CFG_MASK		GENMASK(5, 4)
 #define EN_TRY_SOURCE_MODE_BIT			BIT(3)
 #define USB_FACTORY_MODE_ENABLE_BIT		BIT(2)
@@ -590,9 +591,6 @@ enum {
 #define ALLOW_PD_DRING_UFP_TCCDB_BIT		BIT(0)
 
 #define HVDCP_PULSE_COUNT_MAX_REG		(USBIN_BASE + 0x5B)
-#define PULSE_COUNT_QC2P0_12V			BIT(7)
-#define PULSE_COUNT_QC2P0_9V			BIT(6)
-#define PULSE_COUNT_QC3P0_mask			GENMASK(5, 0)
 #define HVDCP_PULSE_COUNT_MAX_QC2_MASK		GENMASK(7, 6)
 enum {
 	HVDCP_PULSE_COUNT_MAX_QC2_5V,
@@ -600,6 +598,9 @@ enum {
 	HVDCP_PULSE_COUNT_MAX_QC2_12V,
 	HVDCP_PULSE_COUNT_MAX_QC2_INVALID
 };
+#define PULSE_COUNT_QC2P0_12V			BIT(7)
+#define PULSE_COUNT_QC2P0_9V			BIT(6)
+#define PULSE_COUNT_QC3P0_mask			GENMASK(5, 0)
 
 #define USBIN_ADAPTER_ALLOW_CFG_REG		(USBIN_BASE + 0x60)
 #define USBIN_ADAPTER_ALLOW_MASK		GENMASK(3, 0)

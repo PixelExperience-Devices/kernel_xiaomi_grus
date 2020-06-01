@@ -1,4 +1,5 @@
 /* Copyright (c) 2016-2018 The Linux Foundation. All rights reserved.
+ * Copyright (C) 2020 XiaoMi, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -27,6 +28,14 @@ enum print_reason {
 	PR_PARALLEL	= BIT(3),
 	PR_OTG		= BIT(4),
 	PR_OEM          = BIT(5),
+};
+
+enum hvdcp3_type {
+	HVDCP3_NONE = 0,
+	HVDCP3_CLASSA_18W,
+	HVDCP3_CLASSB_27W,
+	USB_PD,
+	HVDCP2_TYPE,
 };
 
 #define DEFAULT_VOTER			"DEFAULT_VOTER"
@@ -69,16 +78,17 @@ enum print_reason {
 #define OTG_VOTER			"OTG_VOTER"
 #define PL_FCC_LOW_VOTER		"PL_FCC_LOW_VOTER"
 #define WBC_VOTER			"WBC_VOTER"
-#define CHG_AWAKE_VOTER            	"CHG_AWAKE_VOTER"
-#define CC_FLOAT_VOTER         "CC_FLOAT_VOTER"
 #define MOISTURE_VOTER			"MOISTURE_VOTER"
 #define HVDCP2_ICL_VOTER		"HVDCP2_ICL_VOTER"
 #define OV_VOTER			"OV_VOTER"
 #define FG_ESR_VOTER			"FG_ESR_VOTER"
+#define FCC_STEPPER_VOTER		"FCC_STEPPER_VOTER"
+#define PD_NOT_SUPPORTED_VOTER		"PD_NOT_SUPPORTED_VOTER"
+#define CHG_AWAKE_VOTER            	"CHG_AWAKE_VOTER"
+#define CC_FLOAT_VOTER         		"CC_FLOAT_VOTER"
 #define UNSTANDARD_QC2_VOTER            "UNSTANDARD_QC2_VOTER"
 #define JEITA_VOTER			"JEITA_VOTER"
 #define PL_HIGH_CAPACITY_VOTER		"PL_HIGH_CAPACITY_VOTER"
-#define FCC_STEPPER_VOTER		"FCC_STEPPER_VOTER"
 
 #define VCONN_MAX_ATTEMPTS	3
 #define OTG_MAX_ATTEMPTS	3
@@ -92,9 +102,9 @@ enum print_reason {
 #define CUTOFF_VOL_THR		3400000
 
 /* QC2.0 voltage UV threshold 7.8V */
-#define QC2_HVDCP_VOL_UV_THR    7800000
-#define CHECK_VBUS_WORK_DELAY_MS        10
-#define UNSTANDARD_HVDCP2_UA    1800000
+#define QC2_HVDCP_VOL_UV_THR		7800000
+#define CHECK_VBUS_WORK_DELAY_MS		10
+#define UNSTANDARD_HVDCP2_UA		1800000
 
 enum smb_mode {
 	PARALLEL_MASTER = 0,
@@ -338,8 +348,9 @@ struct smb_charger {
 	struct delayed_work     monitor_low_temp_work;
 	struct delayed_work     cc_float_charge_work;
 	struct delayed_work     charger_type_recheck;
+	struct delayed_work	check_vbus_work;
 	struct delayed_work     connector_health_work;
-	struct delayed_work     check_vbus_work;
+	struct delayed_work     status_report_work;
 #ifdef CONFIG_CHARGER_BQ25910_SLAVE
 	struct delayed_work     dp_dm_pulse_work;
 #endif
@@ -368,6 +379,7 @@ struct smb_charger {
 	int			fake_batt_status;
 	bool			step_chg_enabled;
 	bool			sw_jeita_enabled;
+	bool                    dynamic_fv_enabled;
 	bool			is_hdc;
 	bool			chg_done;
 	bool			connector_type;
@@ -394,12 +406,13 @@ struct smb_charger {
 	bool			use_extcon;
 	bool			otg_present;
 	bool			is_audio_adapter;
-	bool			report_usb_absent;
 	bool			disable_stat_sw_override;
 	bool			in_chg_lock;
+	bool			fcc_stepper_enable;
+	bool			report_usb_absent;
 	bool                    check_vbus_once;
 	bool                    unstandard_hvdcp;
-	bool			fcc_stepper_enable;
+	bool			support_hw_scpcharger;
 
 	/* workaround flag */
 	u32			wa_flags;
@@ -411,6 +424,7 @@ struct smb_charger {
 	int			qc2_max_pulses;
 	bool			non_compliant_chg_detected;
 	bool			fake_usb_insertion;
+	bool			reddragon_ipc_wa;
 	bool			cc_float_detected;
 	bool			float_rerun_apsd;
 
@@ -428,6 +442,19 @@ struct smb_charger {
 	int			die_health;
 	int			recheck_charger;
 	int			precheck_charger_type;
+};
+
+enum quick_charge_type {
+	QUICK_CHARGE_NORMAL = 0,
+	QUICK_CHARGE_FAST,
+	QUICK_CHARGE_FLASH,
+	QUICK_CHARGE_TURBE,
+	QUICK_CHARGE_MAX,
+};
+
+struct quick_charge {
+	enum power_supply_type adap_type;
+	enum quick_charge_type adap_cap;
 };
 
 int smblib_read(struct smb_charger *chg, u16 addr, u8 *val);
@@ -579,6 +606,7 @@ int smblib_set_prop_type_recheck(struct smb_charger *chg,
 				const union power_supply_propval *val);
 int smblib_get_prop_type_recheck(struct smb_charger *chg,
 				union power_supply_propval *val);
+int smblib_get_quick_charge_type(struct smb_charger *chg);
 void smblib_suspend_on_debug_battery(struct smb_charger *chg);
 int smblib_rerun_apsd_if_required(struct smb_charger *chg);
 int smblib_get_prop_fcc_delta(struct smb_charger *chg,
