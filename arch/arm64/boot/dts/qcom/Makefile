@@ -1,7 +1,3 @@
-dtb-$(CONFIG_ARCH_QCOM)	+= apq8016-sbc.dtb msm8916-mtp.dtb
-dtb-$(CONFIG_ARCH_QCOM)	+= msm8996-mtp.dtb
-dtb-$(CONFIG_ARCH_QCOM)	+= apq8096-db820c.dtb
-
 ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
 	dtbo-$(CONFIG_ARCH_SDM845) += \
 		sdm845-cdp-overlay.dtbo \
@@ -100,6 +96,7 @@ dtb-$(CONFIG_ARCH_SDM845) += sdm845-sim.dtb \
 	sdm845-cdp.dtb \
 	sdm845-v2-rumi.dtb \
 	sdm845-v2-mtp.dtb \
+	sdm845-v2-robotics.dtb \
 	sdm845-v2-cdp.dtb \
 	sdm845-qrd.dtb \
 	sdm845-v2-qrd.dtb \
@@ -109,12 +106,12 @@ dtb-$(CONFIG_ARCH_SDM845) += sdm845-sim.dtb \
 	sdm845-4k-panel-cdp.dtb \
 	sdm845-4k-panel-qrd.dtb \
 	sdm845-interposer-sdm670-mtp.dtb \
-	sdm845-interposer-sdm670-cdp.dtb
+	sdm845-interposer-sdm670-cdp.dtb \
+	sdm845-v2.1-rb3.dtb
 endif
 
 ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
 	dtbo-$(CONFIG_ARCH_SDM670) += \
-		sdm670-cdp-overlay.dtbo \
 		sdm670-mtp-overlay.dtbo \
 		sdm670-rumi-overlay.dtbo \
 		sdm670-qrd-overlay.dtbo \
@@ -133,24 +130,9 @@ ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
 		sdm670-usbc-external-codec-mtp-overlay.dtbo \
 		sdm670-usbc-external-codec-pm660a-cdp-overlay.dtbo \
 		sdm670-usbc-external-codec-pm660a-mtp-overlay.dtbo \
-		sda670-cdp-overlay.dtbo \
-		sda670-mtp-overlay.dtbo \
-		sda670-hdk-overlay.dtbo \
-		sda670-pm660a-cdp-overlay.dtbo \
-		sda670-pm660a-mtp-overlay.dtbo \
 		sdm670-tasha-codec-cdp-overlay.dtbo \
 		sdm670-pm660a-tasha-codec-cdp-overlay.dtbo \
 		sdm670-aqt1000-cdp-overlay.dtbo \
-		sdm670-pm660a-aqt1000-cdp-overlay.dtbo \
-		sxr1120-lc-mtp-overlay.dtbo \
-		sxr1120-lc-external-codec-mtp-overlay.dtbo \
-		sxr1120-lc-cdp-overlay.dtbo \
-		sxr1120-lc-external-codec-cdp-overlay.dtbo \
-		qcs605-mtp-overlay.dtbo \
-		sdm710-cdp-overlay.dtbo \
-		sdm710-mtp-overlay.dtbo \
-		sdm710-qrd-overlay.dtbo \
-		sdm710-qrd-sku2-overlay.dtbo \
 		sdm710-pm660a-cdp-overlay.dtbo \
 		sdm710-pm660a-mtp-overlay.dtbo \
 		sdm710-external-codec-cdp-overlay.dtbo \
@@ -169,12 +151,18 @@ ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
 		sdm710-pm660a-tasha-codec-cdp-overlay.dtbo \
 		sdm710-aqt1000-cdp-overlay.dtbo \
 		sdm710-pm660a-aqt1000-cdp-overlay.dtbo \
+		sxr1130-usbc-external-codec-cdp-overlay.dtbo \
+		sxr1130-usbc-external-codec-mtp-overlay.dtbo \
+		sxr1130-usbc-external-codec-pm660a-mtp-overlay.dtbo \
+		sxr1130-usbc-mtp-overlay.dtbo \
+		sxr1130-usbc-pm660a-mtp-overlay.dtbo \
 		sirius-sdm710-overlay.dtbo \
 		sirius-sdm670-overlay.dtbo \
 		grus-sdm710-overlay.dtbo \
-		grus-sdm712-overlay.dtbo
+		grus-sdm712-overlay.dtbo \
+		pyxis-sdm710-overlay.dtbo \
+		vela-sdm710-overlay.dtbo
 
-sdm670-cdp-overlay.dtbo-base := sdm670.dtb
 sdm670-mtp-overlay.dtbo-base := sdm670.dtb
 sdm670-rumi-overlay.dtbo-base := sdm670.dtb
 sdm670-qrd-overlay.dtbo-base := sdm670.dtb
@@ -196,31 +184,8 @@ sdm670-usbc-external-codec-pm660a-mtp-overlay.dtbo-base := sdm670.dtb
 sdm670-tasha-codec-cdp-overlay.dtbo-base := sdm670.dtb
 sdm670-pm660a-tasha-codec-cdp-overlay.dtbo-base := sdm670.dtb
 sdm670-aqt1000-cdp-overlay.dtbo-base := sdm670.dtb
-sdm670-pm660a-aqt1000-cdp-overlay.dtbo-base := sdm670.dtb
-sda670-cdp-overlay.dtbo-base := sda670.dtb
-sda670-mtp-overlay.dtbo-base := sda670.dtb
-sda670-hdk-overlay.dtbo-base := sda670.dtb
-sda670-pm660a-cdp-overlay.dtbo-base := sda670.dtb
-sda670-pm660a-mtp-overlay.dtbo-base := sda670.dtb
-sxr1120-lc-mtp-overlay.dtbo-base := sxr1120-lc.dtb
-sxr1120-lc-external-codec-mtp-overlay.dtbo-base := sxr1120-lc.dtb
-sxr1120-lc-cdp-overlay.dtbo-base := sxr1120-lc.dtb
-sxr1120-lc-external-codec-cdp-overlay.dtbo-base := sxr1120-lc.dtb
-qcs605-cdp-overlay.dtbo-base := qcs605.dtb
-qcs605-mtp-overlay.dtbo-base := qcs605.dtb
 qcs605-external-codec-mtp-overlay.dtbo-base := qcs605.dtb
-sirius-sdm710-overlay.dtbo-base := sdm710.dtb
-sirius-sdm670-overlay.dtbo-base := sdm670.dtb
-grus-sdm710-overlay.dtbo-base := sdm710.dtb
-grus-sdm712-overlay.dtbo-base := sdm710.dtb
-qcs605-lc-mtp-overlay.dtbo-base := qcs605-lc.dtb
-qcs605-lc-ipcamera-overlay.dtbo-base := qcs605-lc-ipcamera-base.dtb
 qcs605-360camera-overlay.dtbo-base := qcs605.dtb
-qcs605-lc-cdp-overlay.dtbo-base := qcs605-lc-cdp-base.dtb
-sdm710-cdp-overlay.dtbo-base := sdm710.dtb
-sdm710-mtp-overlay.dtbo-base := sdm710.dtb
-sdm710-qrd-overlay.dtbo-base := sdm710.dtb
-sdm710-qrd-sku2-overlay.dtbo-base := sdm710.dtb
 sdm710-pm660a-cdp-overlay.dtbo-base := sdm710.dtb
 sdm710-pm660a-mtp-overlay.dtbo-base := sdm710.dtb
 sdm710-external-codec-cdp-overlay.dtbo-base := sdm710.dtb
@@ -239,22 +204,21 @@ sdm710-tasha-codec-cdp-overlay.dtbo-base := sdm710.dtb
 sdm710-pm660a-tasha-codec-cdp-overlay.dtbo-base := sdm710.dtb
 sdm710-aqt1000-cdp-overlay.dtbo-base := sdm710.dtb
 sdm710-pm660a-aqt1000-cdp-overlay.dtbo-base := sdm710.dtb
-sxr1130-cdp-overlay.dtbo-base := sxr1130.dtb
-sxr1130-external-codec-cdp-overlay.dtbo-base := sxr1130.dtb
-sxr1130-mtp-overlay.dtbo-base := sxr1130.dtb
-sxr1130-external-codec-mtp-overlay.dtbo-base := sxr1130.dtb
-sxr1130-external-codec-pm660a-mtp-overlay.dtbo-base := sxr1130.dtb
-sxr1130-pm660a-mtp-overlay.dtbo-base := sxr1130.dtb
 sxr1130-usbc-external-codec-cdp-overlay.dtbo-base := sxr1130.dtb
 sxr1130-usbc-external-codec-mtp-overlay.dtbo-base := sxr1130.dtb
 sxr1130-usbc-external-codec-pm660a-mtp-overlay.dtbo-base := sxr1130.dtb
 sxr1130-usbc-mtp-overlay.dtbo-base := sxr1130.dtb
 sxr1130-usbc-pm660a-mtp-overlay.dtbo-base := sxr1130.dtb
+sirius-sdm710-overlay.dtbo-base := sdm710.dtb
+sirius-sdm670-overlay.dtbo-base := sdm670.dtb
+grus-sdm710-overlay.dtbo-base := sdm710.dtb
+grus-sdm712-overlay.dtbo-base := sdm710.dtb
+pyxis-sdm710-overlay.dtbo-base := sdm710.dtb
+vela-sdm710-overlay.dtbo-base := sdm710.dtb
 
 else
 dtb-$(CONFIG_ARCH_SDM670) += sdm670-rumi.dtb \
 	sdm670-mtp.dtb \
-	sdm670-cdp.dtb \
 	sdm670-qrd.dtb \
 	sdm670-qrd-sku2.dtb \
 	sdm670-pm660a-mtp.dtb \
@@ -271,22 +235,8 @@ dtb-$(CONFIG_ARCH_SDM670) += sdm670-rumi.dtb \
 	sdm670-usbc-mtp.dtb \
 	sdm670-usbc-pm660a-cdp.dtb \
 	sdm670-usbc-pm660a-mtp.dtb \
-	sda670-mtp.dtb \
-	sda670-hdk.dtb \
-	sda670-cdp.dtb \
 	sdm670-tasha-codec-cdp.dtb \
 	sdm670-pm660a-tasha-codec-cdp.dtb \
-	sda670-pm660a-mtp.dtb \
-	sda670-pm660a-cdp.dtb \
-	sxr1120-lc-mtp.dtb \
-	sxr1120-lc-external-codec-mtp.dtb \
-	sxr1120-lc-cdp.dtb \
-	sxr1120-lc-external-codec-cdp.dtb \
-	qcs605-mtp.dtb \
-	sdm710-mtp.dtb \
-	sdm710-cdp.dtb \
-	sdm710-qrd.dtb \
-	sdm710-qrd-sku2.dtb \
 	sdm710-pm660a-mtp.dtb \
 	sdm710-pm660a-cdp.dtb \
 	sdm710-external-codec-cdp.dtb \
@@ -303,10 +253,17 @@ dtb-$(CONFIG_ARCH_SDM670) += sdm670-rumi.dtb \
 	sdm710-usbc-pm660a-mtp.dtb \
 	sdm710-tasha-codec-cdp.dtb \
 	sdm710-pm660a-tasha-codec-cdp.dtb \
+	sxr1130-usbc-external-codec-cdp.dtb \
+	sxr1130-usbc-external-codec-mtp.dtb \
+	sxr1130-usbc-external-codec-pm660a-mtp.dtb \
+	sxr1130-usbc-mtp.dtb \
+	sxr1130-usbc-pm660a-mtp.dtb \
 	sirius-sdm710.dtb \
 	sirius-sdm670.dtb \
 	grus-sdm710.dtb \
-	grus-sdm712.dtb
+	grus-sdm712.dtb \
+	pyxis-sdm710.dtb \
+	vela-sdm710.dtb
 endif
 
 ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
@@ -323,8 +280,7 @@ dtbo-$(CONFIG_ARCH_MSM8917) += msm8917-mtp-overlay.dtbo \
 	apq8017-cdp-overlay.dtbo \
 	apq8017-cdp-wcd-rome-overlay.dtbo
 
-dtbo-$(CONFIG_ARCH_QM215) +=qm215-qrd-overlay.dtbo \
-	qcm2150-qrd-overlay.dtbo
+dtbo-$(CONFIG_ARCH_QM215) +=qm215-qrd-overlay.dtbo
 dtbo-$(CONFIG_ARCH_QM215) +=qm215-qrd-smb1360-overlay.dtbo
 
 dtbo-$(CONFIG_ARCH_MSM8953) += msm8953-mtp-overlay.dtbo \
@@ -335,7 +291,8 @@ dtbo-$(CONFIG_ARCH_MSM8953) += msm8953-mtp-overlay.dtbo \
 	msm8953-iot-mtp-overlay.dtbo \
 	msm8953-ext-codec-mtp-overlay.dtbo \
 	msm8953-ext-codec-rcm-overlay.dtbo \
-	msm8953-cdp-1200p-overlay.dtbo
+	msm8953-cdp-1200p-overlay.dtbo \
+	msm8953-no-pmi-overlay.dtbo
 
 dtbo-$(CONFIG_ARCH_SDM450) += msm8953-mtp-overlay.dtbo \
 	msm8953-cdp-overlay.dtbo \
@@ -344,7 +301,8 @@ dtbo-$(CONFIG_ARCH_SDM450) += msm8953-mtp-overlay.dtbo \
 	msm8953-iot-mtp-overlay.dtbo \
 	sdm450-cdp-s2-overlay.dtbo \
 	sdm450-mtp-s3-overlay.dtbo \
-	sdm450-qrd-sku4-overlay.dtbo
+	sdm450-qrd-sku4-overlay.dtbo\
+	sdm450-no-pmi-mtp-overlay.dtbo
 
 dtbo-$(CONFIG_ARCH_SDM632) += sdm632-rumi-overlay.dtbo \
 	sdm450-cdp-s2-overlay.dtbo \
@@ -363,7 +321,10 @@ dtbo-$(CONFIG_ARCH_SDM439) += sdm439-mtp-overlay.dtbo \
 
 dtbo-$(CONFIG_ARCH_SDM429) += sdm429-mtp-overlay.dtbo \
 	sdm429-cdp-overlay.dtbo \
-	sdm429-qrd-overlay.dtbo
+	sdm429-qrd-overlay.dtbo \
+	sdm429-spyro-qrd-evt-overlay.dtbo \
+	sdm429-spyro-qrd-dvt-overlay.dtbo \
+	sdm429-spyro-qrd-wdp-overlay.dtbo
 
 msm8940-mtp-overlay.dtbo-base := msm8940-pmi8950.dtb \
 	msm8940-pmi8937.dtb \
@@ -402,7 +363,6 @@ apq8017-cdp-wcd-rome-overlay.dtbo-base := apq8017-pmi8950.dtb \
 	apq8017-pmi8937.dtb
 
 qm215-qrd-overlay.dtbo-base := qm215.dtb
-qcm2150-qrd-overlay.dtbo-base := qcm2150.dtb
 qm215-qrd-smb1360-overlay.dtbo-base := qm215.dtb
 
 msm8953-mtp-overlay.dtbo-base := sdm450.dtb \
@@ -436,6 +396,9 @@ msm8953-ext-codec-mtp-overlay.dtbo-base := msm8953.dtb \
 msm8953-ext-codec-rcm-overlay.dtbo-base := msm8953.dtb \
 	apq8053.dtb
 msm8953-cdp-1200p-overlay.dtbo-base := msm8953.dtb
+
+msm8953-no-pmi-overlay.dtbo-base := msm8953-no-pmi.dtb
+
 sdm450-cdp-s2-overlay.dtbo-base := sdm450-pmi632.dtb \
 	sdm632.dtb \
 	sdm632-pm8004.dtb \
@@ -448,6 +411,9 @@ sdm450-mtp-s3-overlay.dtbo-base := sdm450-pmi632.dtb \
 sdm450-qrd-sku4-overlay.dtbo-base := sdm450-pmi632.dtb \
 	sdm632.dtb \
 	sdm632-pm8004.dtb
+
+sdm450-no-pmi-mtp-overlay.dtbo-base := sdm450-no-pmi.dtb
+
 sdm632-rumi-overlay.dtbo-base := sdm632.dtb
 sdm632-ext-codec-cdp-s3-overlay.dtbo-base := sdm632.dtb \
 	sdm632-pm8004.dtb
@@ -477,6 +443,9 @@ sdm429-cdp-overlay.dtbo-base := sdm429.dtb \
 	msm8937-interposer-sdm429.dtb
 sdm429-qrd-overlay.dtbo-base := sdm429.dtb \
 	msm8937-interposer-sdm429.dtb
+sdm429-spyro-qrd-evt-overlay.dtbo-base := sdm429-spyro.dtb
+sdm429-spyro-qrd-dvt-overlay.dtbo-base := sdm429-spyro-dvt.dtb
+sdm429-spyro-qrd-wdp-overlay.dtbo-base := sdm429-spyro-wdp.dtb
 else
 dtb-$(CONFIG_ARCH_MSM8953) += msm8953-cdp.dtb \
 	msm8953-mtp.dtb \
@@ -509,7 +478,9 @@ dtb-$(CONFIG_ARCH_MSM8953) += msm8953-cdp.dtb \
 	msm8953-pmi8937-mtp.dtb \
 	msm8953-pmi8940-ext-codec-mtp.dtb \
 	msm8953-pmi8937-ext-codec-mtp.dtb \
-	msm8953-pmi632-cdp-s2.dtb
+	msm8953-pmi632-cdp-s2.dtb \
+	apq8053-batcam.dtb \
+	msm8953-no-pmi.dtb
 
 dtb-$(CONFIG_ARCH_MSM8937) += msm8937-pmi8950-mtp.dtb \
 	msm8937-interposer-sdm439-cdp.dtb \
@@ -541,11 +512,11 @@ dtb-$(CONFIG_ARCH_MSM8917) += msm8917-pmi8950-mtp.dtb \
 	msm8917-pmi8940-cdp.dtb \
 	msm8917-pmi8940-rcm.dtb
 
-dtb-$(CONFIG_ARCH_QM215) += qm215-qrd.dtb \
-	qcm2150-qrd.dtb
+dtb-$(CONFIG_ARCH_QM215) += qm215-qrd.dtb
 dtb-$(CONFIG_ARCH_QM215) += qm215-qrd-smb1360.dtb
 
-dtb-$(CONFIG_ARCH_MSM8909) += sdw3100-msm8909w-wtp.dtb \
+dtb-$(CONFIG_ARCH_MSM8909) += msm8909-pm8916-mtp.dtb \
+	sdw3100-msm8909w-wtp.dtb \
 	sdw3100-apq8009w-wtp.dtb \
 	sdw3100-apq8009w-alpha.dtb \
 	apq8009-mtp-wcd9326-refboard.dtb \
@@ -572,7 +543,8 @@ dtb-$(CONFIG_ARCH_SDM450) += sdm450-rcm.dtb \
 	sdm450-pmi632-cdp-s2.dtb \
 	sdm450-pmi632-mtp-s3.dtb \
 	sda450-pmi632-cdp-s2.dtb \
-	sda450-pmi632-mtp-s3.dtb
+	sda450-pmi632-mtp-s3.dtb \
+	sdm450-no-pmi-mtp.dtb
 
 dtb-$(CONFIG_ARCH_SDM632) += sdm632-rumi.dtb \
 	sdm632-cdp-s2.dtb \
@@ -598,16 +570,20 @@ dtb-$(CONFIG_ARCH_SDM439) += sdm439-mtp.dtb \
 	sdm439-external-codec-mtp.dtb \
 	sdm439-rcm.dtb \
 	qm215-qrd.dtb \
-	qcm2150-qrd.dtb \
 	qm215-qrd-smb1360.dtb
 
 dtb-$(CONFIG_ARCH_SDM429) += sdm429-mtp.dtb \
 	sdm429-cdp.dtb \
 	sdm429-qrd.dtb \
 	sda429-mtp.dtb \
-	sda429-cdp.dtb
+	sda429-cdp.dtb \
+	sdm429-spyro.dtb \
+	sdm429-spyro-dvt.dtb \
+	sdm429-spyro-wdp.dtb
 
 endif
+
+dtb-$(CONFIG_ARCH_SDM845_VM) += sdm845-vm.dtb
 
 always		:= $(dtb-y)
 subdir-y	:= $(dts-dirs)
