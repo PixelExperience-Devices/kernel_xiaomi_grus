@@ -2,6 +2,7 @@
  *  thermal_core.h
  *
  *  Copyright (C) 2012  Intel Corp
+ *  Copyright (C) 2020 XiaoMi, Inc.
  *  Author: Durgadoss R <durgadoss.r@intel.com>
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -66,10 +67,8 @@ struct thermal_message {
 };
 
 extern struct thermal_message *tm;
-
 int thermal_register_governor(struct thermal_governor *);
 void thermal_unregister_governor(struct thermal_governor *);
-void handle_thermal_trip(struct thermal_zone_device *tz, int trip);
 
 #ifdef CONFIG_THERMAL_GOV_STEP_WISE
 int thermal_gov_step_wise_register(void);
@@ -131,6 +130,8 @@ int of_thermal_aggregate_trip(struct thermal_zone_device *tz,
 			      enum thermal_trip_type type,
 			      int *low, int *high);
 void of_thermal_handle_trip(struct thermal_zone_device *tz);
+void of_thermal_handle_trip_temp(struct thermal_zone_device *tz,
+					int trip_temp);
 int of_parse_thermal_message(void);
 void free_thermal_message(void);
 #else
@@ -158,6 +159,10 @@ static inline int of_thermal_aggregate_trip(struct thermal_zone_device *tz,
 }
 static inline
 void of_thermal_handle_trip(struct thermal_zone_device *tz)
+{ }
+static inline
+void of_thermal_handle_trip_temp(struct thermal_zone_device *tz,
+					int trip_temp)
 { }
 #endif
 
