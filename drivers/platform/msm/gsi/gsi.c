@@ -22,7 +22,7 @@
 #include "gsi_reg.h"
 #include "gsi_emulation.h"
 
-#define GSI_CMD_TIMEOUT (5*HZ)
+#define GSI_CMD_TIMEOUT msecs_to_jiffies(500)
 #define GSI_STOP_CMD_TIMEOUT_MS 50
 #define GSI_MAX_CH_LOW_WEIGHT 15
 

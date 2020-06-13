@@ -30,7 +30,7 @@
 #define DEFAULT_OUTSTANDING_HIGH 64
 #define DEFAULT_OUTSTANDING_LOW 32
 #define DEBUGFS_TEMP_BUF_SIZE 4
-#define TX_TIMEOUT (5 * HZ)
+#define TX_TIMEOUT msecs_to_jiffies(500)
 
 #define IPA_ECM_IPC_LOG_PAGES 50
 

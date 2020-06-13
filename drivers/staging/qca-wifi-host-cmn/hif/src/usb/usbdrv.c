@@ -1094,7 +1094,7 @@ QDF_STATUS usb_hif_submit_ctrl_out(struct HIF_DEVICE_USB *device,
 					req,
 					USB_DIR_OUT | USB_TYPE_VENDOR |
 					USB_RECIP_DEVICE, value, index, buf,
-					size, 2 * HZ);
+					size, msecs_to_jiffies(200));
 
 		if (result < 0) {
 			HIF_ERROR("%s failed,result = %d", __func__, result);
@@ -1146,7 +1146,7 @@ QDF_STATUS usb_hif_submit_ctrl_in(struct HIF_DEVICE_USB *device,
 					req,
 					USB_DIR_IN | USB_TYPE_VENDOR |
 					USB_RECIP_DEVICE, value, index, buf,
-					size, 2 * HZ);
+					size, msecs_to_jiffies(200));
 
 		if (result < 0) {
 			HIF_ERROR("%s failed, result = %d", __func__, result);

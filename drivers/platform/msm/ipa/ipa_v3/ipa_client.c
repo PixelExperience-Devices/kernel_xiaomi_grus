@@ -123,7 +123,7 @@ int ipa3_disable_data_path(u32 clnt_hdl)
 				IPADBG("uC is not loaded yet, waiting...\n");
 				res = wait_for_completion_timeout(
 					&ipa3_ctx->uc_loaded_completion_obj,
-					60 * HZ);
+					msecs_to_jiffies(6000));
 				if (res == 0)
 					IPADBG("timeout waiting for uC load\n");
 			}
