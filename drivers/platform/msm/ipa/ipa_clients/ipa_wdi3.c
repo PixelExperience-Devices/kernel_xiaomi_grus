@@ -476,6 +476,7 @@ int ipa_wdi_conn_pipes(struct ipa_wdi_conn_in_params *in,
 			goto fail_add_dependency;
 		}
 	} else {
+		memset(&pm_params, 0, sizeof(pm_params));
 		pm_params.name = "wdi";
 		pm_params.callback = ipa_wdi_pm_cb;
 		pm_params.user_data = NULL;
@@ -733,7 +734,7 @@ int ipa_wdi_enable_pipes(void)
 		ret = ipa_rm_request_resource(IPA_RM_RESOURCE_WLAN_PROD);
 		if (ret == -EINPROGRESS) {
 			if (wait_for_completion_timeout(
-				&ipa_wdi_ctx->wdi_completion, msecs_to_jiffies(1000)) == 0) {
+				&ipa_wdi_ctx->wdi_completion, 10*HZ) == 0) {
 				IPA_WDI_ERR("WLAN_PROD res req time out\n");
 				return -EFAULT;
 			}
