@@ -4503,6 +4503,7 @@ static int panel_disp_param_send_lock(struct dsi_panel *panel, int param)
 	uint32_t temp = 0;
 	u32  bl_level = 0;
 	u32 fod_backlight = 0;
+
 	struct drm_device *drm_dev = NULL;
 	struct dsi_display *display;
 	struct mipi_dsi_host *host = panel->host;
@@ -4511,13 +4512,16 @@ static int panel_disp_param_send_lock(struct dsi_panel *panel, int param)
 
 	if (host) {
 		display = container_of(host, struct dsi_display, host);
-		if (display && display->drm_dev)
-			drm_dev = display->drm_dev;
+		if (!display || !display->drm_dev) {
+			pr_err("[LCD] invalid display/drm_dev\n");
+			return -EINVAL;
+		}
+		drm_dev = display->drm_dev;
 	}
 
 	if (!panel->panel_initialized
-		&& param != 0x1000000 /* DISPPARAM_FOD_BACKLIGHT_ON */
-		&& param != 0x2000000 /* DISPPARAM_FOD_BACKLIGHT_OFF */) {
+		&& (param & 0x0F000000) != 0x1000000 /* DISPPARAM_FOD_BACKLIGHT_ON */
+		&& (param & 0x0F000000) != 0x2000000 /* DISPPARAM_FOD_BACKLIGHT_OFF */) {
 		pr_err("[LCD] panel not ready! [cmd = 0x%2x]\n", param);
 		mutex_unlock(&panel->panel_lock);
 		return rc;
@@ -4527,21 +4531,7 @@ static int panel_disp_param_send_lock(struct dsi_panel *panel, int param)
 
 	if ((param & 0x00F00000) == 0xD00000) {
 		fod_backlight = (param & 0x01FFF);
-		param = (param & 0x00F00000);
-	}
-
-	/*if ((param & 0x1000000) && panel->last_bl_lvl) {*/
-	if (0) {
-		panel->hist_bl_offset = (param & 0x0FF);
-		if (panel->hist_bl_offset > HIST_BL_OFFSET_LIMIT)
-			panel->hist_bl_offset = HIST_BL_OFFSET_LIMIT;
-		bl_level = panel->last_bl_lvl + panel->hist_bl_offset;
-		if (panel->bl_config.type == DSI_BACKLIGHT_WLED)
-			led_trigger_event(panel->bl_config.wled, bl_level);
-		else if (panel->bl_config.type == DSI_BACKLIGHT_DCS)
-			dsi_panel_update_backlight(panel, bl_level);
-		pr_debug("[LCD] last_bl_lvl:%d,offset:%d,bl_level:%d!\n", panel->last_bl_lvl, panel->hist_bl_offset, bl_level);
-		param = 0x1000000;
+		param = (param & 0x0FF00000);
 	}
 
 	temp = param & 0x0000000F;
@@ -4611,24 +4601,24 @@ static int panel_disp_param_send_lock(struct dsi_panel *panel, int param)
 
 	temp = param & 0x00000F00;
 	switch (temp) {
-	case 0x100:		/*cabc ui on*/
+	case 0x100:
 		pr_debug("cabc ui on\n");
 		rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_DISP_CABCUION);
 		break;
-	case 0x200:		/*cabc still on*/
-		pr_debug("cabcstillon\n");
+	case 0x200:
+		pr_debug("cabc still on\n");
 		rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_DISP_CABCSTILLON);
 		break;
-	case 0x300:		/*cabc movie on*/
-		pr_debug("cabcmovieon\n");
+	case 0x300:
+		pr_debug("cabc movie on\n");
 		rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_DISP_CABCMOVIEON);
 		break;
-	case 0x400:		/*cabc off*/
-		pr_debug("cabcoff\n");
+	case 0x400:
+		pr_debug("cabc off\n");
 		rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_DISP_CABCOFF);
 		break;
 	case 0xF00:
-		pr_debug("dimmingon\n");
+		pr_debug("dimming on\n");
 		if (panel->skip_dimmingon != STATE_DIM_BLOCK) {
 			if (ktime_after(ktime_get(), panel->fod_hbm_off_time)) {
 				dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_DISP_DIMMINGON);
@@ -4685,7 +4675,7 @@ static int panel_disp_param_send_lock(struct dsi_panel *panel, int param)
 		pr_debug("hbm fod to normal mode\n");
 		rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_DISP_HBM_FOD2NORM);
 		if (drm_dev)
-	 		drm_dev->hbm_status = 1;
+			drm_dev->hbm_status = 1;
 		break;
 	case 0xE0000:
 		pr_debug("hbm fod off\n");
@@ -4705,14 +4695,14 @@ static int panel_disp_param_send_lock(struct dsi_panel *panel, int param)
 			panel->skip_dimmingon = STATE_NONE;
 		}
 		if (drm_dev)
- 			drm_dev->hbm_status = 1;
+			drm_dev->hbm_status = 0;
 		break;
 	case 0xF0000:
 		pr_debug("hbm off\n");
 		rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_DISP_HBM_OFF);
 		panel->skip_dimmingon = STATE_NONE;
 		if (drm_dev)
-	 		drm_dev->hbm_status = 1;
+			drm_dev->hbm_status = 0;
 		break;
 	default:
 		break;
