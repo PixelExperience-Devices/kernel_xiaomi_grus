@@ -37,6 +37,7 @@
 #define DSI_MODE_MAX 5
 
 #define HIST_BL_OFFSET_LIMIT 48
+#define DEFAULT_FOD_OFF_DIMMING_DELAY 170
 
 enum dsi_panel_rotation {
 	DSI_PANEL_ROTATE_NONE = 0,
@@ -56,6 +57,13 @@ enum dsi_backlight_type {
 enum dsi_doze_mode_type {
 	DSI_DOZE_LPM = 0,
 	DSI_DOZE_HBM,
+};
+
+enum bkl_dimming_state {
+	STATE_NONE,
+	STATE_DIM_BLOCK,
+	STATE_DIM_RESTORE,
+	STATE_ALL
 };
 
 enum bl_update_flag {
@@ -227,7 +235,12 @@ struct dsi_panel {
 	u32 skip_dimmingon;
 
 	bool fod_hbm_enabled;
+	bool fod_dimlayer_enabled;
+ 	bool fod_dimlayer_hbm_enabled;
+	bool fod_ui_ready;
+	u32 fod_off_dimming_delay;
 	ktime_t fod_hbm_off_time;
+	ktime_t fod_backlight_off_time;
 
 	char dsc_pps_cmd[DSI_CMD_PPS_SIZE];
 	enum dsi_dms_mode dms_mode;
@@ -237,6 +250,27 @@ struct dsi_panel {
 	u32 last_bl_lvl;
 	s32 backlight_delta;
 	u32 doze_backlight_threshold;
+
+	bool fod_crc_p3_gamut_calibration;
+
+	/* Display count */
+	bool panel_active_count_enable;
+	u64 boottime;
+	u64 bootRTCtime;
+	u64 bootdays;
+	u64 panel_active;
+	u64 kickoff_count;
+	u64 bl_duration;
+	u64 bl_level_integral;
+	u64 bl_highlevel_duration;
+	u64 bl_lowlevel_duration;
+	u64 hbm_duration;
+	u64 hbm_times;
+	u32 dc_threshold;
+	bool dc_enable;
+	bool dim_layer_replace_dc;
+	bool fod_dimlayer_bl_block;
+	bool fodflag;
 
 	bool doze_enabled;
 	enum dsi_doze_mode_type doze_mode;
