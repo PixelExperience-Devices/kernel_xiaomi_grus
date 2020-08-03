@@ -4708,6 +4708,10 @@ static int panel_disp_param_send_lock(struct dsi_panel *panel, int param)
 		pr_debug("cabc off\n");
 		rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_DISP_CABCOFF);
 		break;
+	case 0xE00:
+		pr_debug("dimming off\n");
+		rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_DISP_DIMMINGOFF);
+		break;
 	case 0xF00:
 		pr_debug("dimming on\n");
 		if (panel->skip_dimmingon != STATE_DIM_BLOCK) {
