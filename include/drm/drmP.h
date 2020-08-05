@@ -906,7 +906,6 @@ struct drm_device {
 	int state;
 	int pre_state;
 	int doze_brightness;
-	bool fp_quickon;
  	int hbm_status;
 
 	struct drm_bridge *bridge;
